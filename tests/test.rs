@@ -24,3 +24,4 @@ define_builder! {b"some bytes"}
 define_builder! {(10, "string")}
 define_builder! {[1, 2, 3, 4, 5]}
 define_builder! {[0u8; 5]}
+define_builder! {[] as [i32; 0]}
