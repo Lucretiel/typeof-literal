@@ -111,6 +111,7 @@ impl<'a> Typename<'a> {
             }),
 
             // Fun extras:
+            // Composite types: tuple, arrays, reference
             Expr::Array(array) => {
                 // TODO: theoretically we could scan until we find a literal
                 // and use that, to allow expressions like `[a, b, "hello"]`
@@ -126,8 +127,16 @@ impl<'a> Typename<'a> {
                 Ok(Typename::Array(Box::new(inner), len))
             }
 
-            // Assignments are valid expressions of unit type
-            Expr::Assign(_) => Ok(Self::unit()),
+            Expr::Reference(reference) => Self::from_expr(&*reference.expr)
+                .map(Box::new)
+                .map(Self::Reference),
+
+            Expr::Tuple(t) => t
+                .elems
+                .iter()
+                .map(Self::from_expr)
+                .collect::<Result<_, _>>()
+                .map(Self::Tuple),
 
             // Block-like things; just look to see if there's a literal in
             // the tail position
@@ -145,6 +154,10 @@ impl<'a> Typename<'a> {
                 }
             }
 
+            Expr::Group(ExprGroup { expr, .. }) | Expr::Paren(ExprParen { expr, .. }) => {
+                Self::from_expr(&**expr)
+            }
+
             // Control flow stuff has type `!`
             Expr::Return(_) | Expr::Break(_) | Expr::Continue(_) => Ok(Self::Never),
 
@@ -153,20 +166,8 @@ impl<'a> Typename<'a> {
             // here to judge.
             Expr::Cast(cast) => Ok(Self::Type(&*cast.ty)),
 
-            Expr::Group(ExprGroup { expr, .. }) | Expr::Paren(ExprParen { expr, .. }) => {
-                Self::from_expr(&**expr)
-            }
-
-            Expr::Reference(reference) => Self::from_expr(&*reference.expr)
-                .map(Box::new)
-                .map(Self::Reference),
-
-            Expr::Tuple(t) => t
-                .elems
-                .iter()
-                .map(Self::from_expr)
-                .collect::<Result<_, _>>()
-                .map(Self::Tuple),
+            // Assignments are valid expressions of unit type
+            Expr::Assign(_) => Ok(Self::unit()),
 
             _ => Err(error(ErrorKind::UnsupportedExpression)),
         }
