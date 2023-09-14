@@ -47,11 +47,12 @@ assert_eq!(computed(), 3);
 In these examples, the `maker` macro is used to create a function that returns
 a literal value. `typeof_literal` allows us to automatically know the type of
 that literal, so that we can use it for the function's return type, instead of
-forcing the caller to include it with something like `maker!(int => 123 as i64)`.
+forcing the caller to include it with something like
+`maker!(int => 123 as i64)`.
 
-It only works on primitive literals and composites of literals. In the future
-we may add support for simple binary operations like `1 + 2`, struct literals,
-etc.
+Currently it only works on primitive literals and composites of literals. In
+the future we may add support for simple binary operations like `1 + 2`, struct
+literals, etc.
 */
 
 use std::fmt::{self, Display, Formatter};
