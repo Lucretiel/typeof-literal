@@ -136,13 +136,13 @@ fn typename(expr: &Expr) -> Result<proc_macro2::TokenStream, Error> {
         }
 
         Expr::Repeat(array) => {
-            let inner = typename(&*array.expr)?;
+            let inner = typename(&array.expr)?;
             let len = &array.len;
             Ok(quote! {[#inner; #len]})
         }
 
         Expr::Reference(reference) => {
-            let inner = typename(&*reference.expr)?;
+            let inner = typename(&reference.expr)?;
             Ok(quote! {&'static #inner})
         }
 
